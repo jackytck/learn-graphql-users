@@ -9,6 +9,7 @@ app.use('/graphql', expressGraphQL({
   graphiql: true
 }))
 
-app.listen(4000, () => {
-  console.log('Listening')
+const port = 4000
+app.listen(port, () => {
+  console.log(`Listening: http://127.0.0.1:${port}/graphql`)
 })
