@@ -44,6 +44,15 @@ const RootQuery = new GraphQLObjectType({
           .then(resp => resp.data)
           .catch(err => console.warn(err.response.status))
       }
+    },
+    company: {
+      type: CompanyType,
+      args: { id: { type: GraphQLString } },
+      resolve (parentValue, args) {
+        return axios.get(`http://localhost:3000/companies/${args.id}`)
+          .then(resp => resp.data)
+          .catch(err => console.warn(err.response.status))
+      }
     }
   }
 })
