@@ -4,7 +4,8 @@ const {
   GraphQLInt,
   GraphQLString,
   GraphQLSchema,
-  GraphQLList
+  GraphQLList,
+  GraphQLNonNull
 } = graphql
 const axios = require('axios')
 
@@ -18,7 +19,7 @@ const CompanyType = new GraphQLObjectType({
       type: new GraphQLList(UserType),
       resolve (parentValue, args) {
         return axios.get(`http://localhost:3000/companies/${parentValue.id}/users`)
-          .then(resp => resp.data)
+          .then(res => res.data)
           .catch(err => console.warn(err.response.status))
       }
     }
@@ -35,7 +36,7 @@ const UserType = new GraphQLObjectType({
       type: CompanyType,
       resolve (parentValue, args) {
         return axios.get(`http://localhost:3000/companies/${parentValue.companyId}`)
-          .then(resp => resp.data)
+          .then(res => res.data)
           .catch(err => console.warn(err.response.status))
       }
     }
@@ -50,7 +51,7 @@ const RootQuery = new GraphQLObjectType({
       args: { id: { type: GraphQLString } },
       resolve (parentValue, args) {
         return axios.get(`http://localhost:3000/users/${args.id}`)
-          .then(resp => resp.data)
+          .then(res => res.data)
           .catch(err => console.warn(err.response.status))
       }
     },
@@ -59,7 +60,26 @@ const RootQuery = new GraphQLObjectType({
       args: { id: { type: GraphQLString } },
       resolve (parentValue, args) {
         return axios.get(`http://localhost:3000/companies/${args.id}`)
-          .then(resp => resp.data)
+          .then(res => res.data)
+          .catch(err => console.warn(err.response.status))
+      }
+    }
+  }
+})
+
+const mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addUser: {
+      type: UserType,
+      args: {
+        firstName: { type: new GraphQLNonNull(GraphQLString) },
+        age: { type: new GraphQLNonNull(GraphQLInt) },
+        companyId: { type: GraphQLString }
+      },
+      resolve (parentValue, { firstName, age, companyId }) {
+        return axios.post('http://localhost:3000/users', { firstName, age, companyId })
+          .then(res => res.data)
           .catch(err => console.warn(err.response.status))
       }
     }
@@ -67,5 +87,6 @@ const RootQuery = new GraphQLObjectType({
 })
 
 module.exports = new GraphQLSchema({
+  mutation,
   query: RootQuery
 })
